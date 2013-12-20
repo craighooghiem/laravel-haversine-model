@@ -12,14 +12,6 @@
 	*/
     class Haversine extends Eloquent {
 
-        /**
-         * name of the table
-         *
-         * @access  public
-         * @var     string
-         */
-        protected $table_name;
-
         public function __construct()
         {
             parent::__construct();
@@ -31,7 +23,7 @@
          *  @param float $lng longitude of the point of interest
          *  @return array
          */
-        public function closest( $lat, $lng, $max_distance = 25, $max_locations = 10, $units = 'miles', $fields = false )
+        public function nearest( $table_name, $lat, $lng, $max_distance = 25, $max_locations = 10, $units = 'kilometers', $fields = false )
         {
             /*
              *  Allow for changing of units of measurement
@@ -57,25 +49,26 @@
             /*
              *  Generate the select field for disctance
              */
-            $disctance_select = sprintf(
-                    "( %d * acos( cos( radians(%s) ) " .
-                            " * cos( radians( lat ) ) " .
-                            " * cos( radians( lng ) - radians(%s) ) " .
-                            " + sin( radians(%s) ) * sin( radians( lat ) ) " .
-                        ") " . 
+            $distance_select = sprintf(
+                "( %d * acos( cos( radians(%s) ) " .
+                        " * cos( radians( latitude ) ) " .
+                        " * cos( radians( longitude ) - radians(%s) ) " .
+                        " + sin( radians(%s) ) * sin( radians( latitude ) ) " .
                     ") " . 
-                    "AS distance",
-                    $gr_circle_radius,               
-                    $lat,
-                    $lng,
-                    $lat
-                );
+                ") " . 
+                "AS distance",
+                $gr_circle_radius,               
+                $lat,
+                $lng,
+                $lat
+            );
 
             return DB::table( $table_name )
+                ->select(DB::raw($distance_select))
                 ->having( 'distance', '<', $max_distance )
                 ->take( $max_locations )
-                ->order_by( 'distance', 'ASC' )
-                ->get( array($fields, $disctance_select) );
+                ->orderBy( 'distance', 'ASC' )
+                ->get($fields);
         }
 
     }
