@@ -23,7 +23,7 @@
          *  @param float $lng longitude of the point of interest
          *  @return array
          */
-        public function nearest( $table_name, $lat, $lng, $max_distance = 25, $max_locations = 10, $units = 'kilometers', $fields = false )
+        public function nearest( $table_name, $latitude, $longitude, $max_distance = 25, $max_locations = 10, $units = 'kilometers', $fields = false )
         {
             /*
              *  Allow for changing of units of measurement
@@ -58,9 +58,9 @@
                 ") " . 
                 "AS distance",
                 $gr_circle_radius,               
-                $lat,
-                $lng,
-                $lat
+                $latitude,
+                $longitude,
+                $latitude
             );
 
             return DB::table( $table_name )
